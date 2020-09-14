@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous" />
+
+    <title>Admin Page</title>
+    <script>
+        function getData() {
+
+            let requestURL = "http://localhost:4000/admin/viewDoctors";
+
+            const tbody = document.getElementById("tData");
+            // clear existing data from tbody if it exists
+            tbody.innerHTML = "";
+            fetch(requestURL)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(element => {
+                        //start a new row
+                        let row = "";
+                        row += "<tr>";
+                        for (const property in element) {
+                            //populate the row with data from the database
+                            row += "<td>" + element[property] + "</td>";
+                        }
+                        //end the row and add it to the table
+                        row += "</tr>";
+                        tbody.insertAdjacentHTML("beforeend", row);
+                    });
+                });
+        }
+    </script>
+</head>
+
+<body onload="getData();">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Hope Clinic</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/viewPatient.html">Patients</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/viewUser.html">Users</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/viewDoctor.html">Doctors</a>
+                </li>
+            </ul>
+        </div>
+        <form class="form-inline my-2 my-lg-0" method="GET" action="/logout">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+                Logout
+            </button>
+        </form>
+    </nav>
+    <section>
+        <div class="row" style="margin-right: 0px;">
+            <div class="col-1">
+                <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <a class="nav-link active" id="v-pills-overview-tab" data-toggle="pill" href="#v-pills-overview"
+                        role="tab" aria-controls="v-pills-overview" aria-selected="true">Overview</a>
+                    <a class="nav-link" id="v-pills-add-tab" data-toggle="pill" href="#v-pills-add" role="tab"
+                        aria-controls="v-pills-add" aria-selected="false">Add</a>
+                    <a class="nav-link" id="v-pills-edit-tab" data-toggle="pill" href="#v-pills-edit" role="tab"
+                        aria-controls="v-pills-edit" aria-selected="false">Edit</a>
+                    <a class="nav-link" id="v-pills-delete-tab" data-toggle="pill" href="#v-pills-delete" role="tab"
+                        aria-controls="v-pills-delete" aria-selected="false">Delete</a>
+                </div>
+            </div>
+            <div class="col-5">
+                <div class="tab-content" id="v-pills-tabContent">
+                    <!--Display all the doctors-->
+                    <div class="tab-pane fade show active" id="v-pills-overview" role="tabpanel"
+                        aria-labelledby="v-pills-overview-tab">
+                        <h3>Doctors List</h3>
+
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Last Name</th>
+                                    <th scope="col">First Name</th>
+                                    <th scope="col">Specialization</th>
+                                    <th scope="col">Department</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tData">
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--Add new doctor -->
+                    <div class="tab-pane fade" id="v-pills-add" role="tabpanel" aria-labelledby="v-pills-add-tab">
+                        <h3>Add New Doctor</h3>
+                        <!-- This div is linked to the sidebar-->
+                        <form method="POST" action="/admin/addNewDoctor">
+                            <label for="doctorId">Doctor ID</label>
+                            <input type="text" class="form-control" id="doctorId" name="doctorId" maxlength="5"
+                                required>
+
+                            <label for="firstName">First Name</label>
+                            <input type="text" class="form-control" id="firstName" name="firstName" required>
+
+                            <label for="lastName">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" name="lastName" required>
+
+                            <label for="specialization">Specialization</label>
+                            <input type="text" class="form-control" id="specialization" name="specialization" required>
+
+                            <label for="department">Department</label>
+                            <input type="text" class="form-control" id="department" name="department" required>
+
+                            <input type="submit" class="btn btn-primary" value="Submit" id="submit_btn">
+                        </form>
+                    </div>
+                    <!--Edit doctor tab-->
+                    <div class="tab-pane fade" id="v-pills-edit" role="tabpanel" aria-labelledby="v-pills-edit-tab">
+                        <h3>Edit Doctor Profile</h3>
+                        <!--Search for doctor-->
+                        <form class="form-inline" id="searchDoctor" onsubmit="searchDoctor(event)">
+                            <div class="form-group mx-sm-0 mb-2">
+                                <label for="doctorId" class="sr-only">Doctor ID</label>
+                                <input type="text" class="form-control" id="doctorId" name="doctorId"
+                                    placeholder="Doctor ID" maxlength="5" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary mb-2">Search</button>
+                        </form>
+
+                        <form id="editDoctor" onsubmit="editDoctor()">
+                            <label for="doctorId">Doctor ID</label>
+                            <input type="text" class="form-control" id="doctorId" name="doctorId"
+                                placeholder="Doctor ID" readonly>
+
+                            <label for="firstName">First Name</label>
+                            <input type="text" class="form-control" id="firstName" name="firstName" required>
+
+                            <label for="lastName">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" name="lastName" required>
+
+                            <label for="specialization">Specialization</label>
+                            <input type="text" class="form-control" id="specialization" name="specialization" required>
+
+                            <label for="department">Department</label>
+                            <input type="text" class="form-control" id="department" name="department" required>
+
+                            <input type="submit" class="btn btn-primary" value="Save" id="submit_btn">
+                        </form>
+                    </div>
+                    <!--Delete Doctor-->
+                    <div class="tab-pane fade" id="v-pills-delete" role="tabpanel" aria-labelledby="v-pills-delete-tab">
+                        <h3>Delete Doctor</h3>
+                        <form class="form-inline" id="searchDeleteDoctor" onsubmit="searchDeleteDoctor(event)">
+                            <div class="form-group mx-sm-0 mb-2">
+                                <label for="doctorId" class="sr-only">Doctor ID</label>
+                                <input type="text" class="form-control" id="doctorId" name="doctorId"
+                                    placeholder="Doctor ID" maxlength="5" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary mb-2">Search</button>
+                        </form>
+
+                        <form id="deleteDoctor" onsubmit="deleteDoctor(event)">
+                            <label for="doctorId">Doctor ID</label>
+                            <input type="text" class="form-control" id="doctorId" name="doctorId"
+                                placeholder="Doctor ID" readonly>
+
+                            <label for="firstName">First Name</label>
+                            <input type="text" class="form-control" id="firstName" name="firstName" readonly>
+
+                            <label for="lastName">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" name="lastName" readonly>
+
+                            <input type="submit" class="btn btn-danger" value="Delete" id="submit_btn">
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        async function searchDoctor(e) {
+            e.preventDefault();
+            let formElement = document.querySelector("#searchDoctor");
+
+            let id = formElement.doctorId.value;
+
+            let requestURL = `http://localhost:4000/admin/searchDoctor/${id}`;
+            console.log(requestURL)
+            let response = await fetch(requestURL, {
+                method: 'GET', // or 'PUT'
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            //get the response from the backend
+            let payload = await response.json();
+            //if the status code is 400 and over then error
+            if (response.status >= 400) {
+                console.error('Error:', payload);
+            }
+            // get the data from the response and add it to the form
+            else {
+                let formEditDoctor = document.querySelector("#editDoctor");
+                formEditDoctor.doctorId.value = payload.doctorId;
+                formEditDoctor.firstName.value = payload.firstName;
+                formEditDoctor.lastName.value = payload.lastName;
+                formEditDoctor.specialization.value = payload.specialization;
+                formEditDoctor.department.value = payload.department;
+            }
+        }
+        async function editDoctor() {
+            // e.preventDefault();
+            let formElement = document.querySelector("#editDoctor");
+            let doctorId = formElement.doctorId.value;
+            let firstName = formElement.firstName.value;
+            let lastName = formElement.lastName.value;
+            let specialization = formElement.specialization.value;
+            let department = formElement.department.value;
+
+
+            const data = { doctorId: doctorId, firstName: firstName, lastName: lastName, specialization: specialization, department: department }
+            let requestURL = "http://localhost:4000/admin/editDoctor";
+
+            // clear existing data from tbody if it exists
+            let response = await fetch(requestURL, {
+                method: 'PUT', // or 'PUT'
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+
+            let payload = await response.json();
+            if (response.status >= 400) {
+                console.error('Error:', payload);
+            }
+            else {
+                //location.reload();
+            }
+        }
+        async function searchDeleteDoctor(e) {
+            e.preventDefault();
+            let formElement = document.querySelector("#searchDeleteDoctor");
+
+            let id = formElement.doctorId.value;
+
+            let requestURL = `http://localhost:4000/admin/searchDoctor/${id}`;
+            console.log(requestURL)
+            let response = await fetch(requestURL, {
+                method: 'GET', // or 'PUT'
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            //get the response from the backend
+            let payload = await response.json();
+            //if the status code is 400 and over then error
+            if (response.status >= 400) {
+                console.error('Error:', payload);
+            }
+            // get the data from the response and add it to the form
+            else {
+                let formdeleteDoctor = document.querySelector("#deleteDoctor");
+                formdeleteDoctor.doctorId.value = payload.doctorId;
+                formdeleteDoctor.firstName.value = payload.firstName;
+                formdeleteDoctor.lastName.value = payload.lastName;
+            }
+        }
+        async function deleteDoctor(e) {
+            e.preventDefault();
+            let formElement = document.querySelector("#deleteDoctor");
+            let id = formElement.doctorId.value;
+
+            let requestURL = `http://localhost:4000/admin/deleteDoctor/${id}`;
+            console.log(requestURL)
+            let response = await fetch(requestURL, {
+                method: 'GET', // or 'PUT'
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+
+            let payload = await response.json();
+            if (response.status >= 400) {
+                console.error('Error:', payload);
+            }
+            else {
+                //location.reload();
+            }
+        }
+    </script>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
